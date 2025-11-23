@@ -6,24 +6,24 @@ body {
 }
 
 
-/* PASO 2: Pegamos el HACK del calendario que ya teníamos
-*/
+/* PASO 2: Estilos del Calendario "Modern Dark" */
 .react-calendar {
   width: 100%;
   max-width: 100%;
-  background: white; /* El calendario sí debe ser blanco */
-  border: 1px solid #a0a096;
-  font-family: Arial, Helvetica, sans-serif;
+  background: #2D3748; /* gray.700 - Fondo oscuro */
+  border: 1px solid #4A5568; /* gray.600 - Borde sutil */
+  font-family: 'Outfit', sans-serif; /* Fuente Outfit */
   line-height: 1.125em;
-  border-radius: 8px;
-  padding: 0.5em;
+  border-radius: 16px; /* Bordes más redondeados */
+  padding: 1em;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* --- Estilos para la navegación (Mes, flechas) --- */
 .react-calendar__navigation {
   display: flex;
   height: 44px;
-  margin-bottom: 0.5em;
+  margin-bottom: 1em;
 }
 .react-calendar__navigation button {
   min-width: 44px;
@@ -31,10 +31,21 @@ body {
   border: none;
   font-size: 1.2em;
   cursor: pointer;
+  color: white; /* Texto blanco */
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.react-calendar__navigation button:hover {
+  background-color: #4A5568; /* gray.600 */
+}
+.react-calendar__navigation button:disabled {
+  background-color: transparent;
+  opacity: 0.5;
 }
 .react-calendar__navigation__label {
   flex-grow: 1 !important;
   font-weight: bold;
+  text-transform: capitalize;
 }
 
 /* --- Estilos para los nombres de los días (Lun, Mar...) --- */
@@ -47,39 +58,49 @@ body {
 }
 .react-calendar__month-view__weekdays__weekday {
   padding: 0.5em;
-  color: #242424; /* Color oscuro */
+  color: #A0AEC0; /* gray.400 - Texto gris claro */
+  text-decoration: none !important;
+}
+abbr[title] {
+  text-decoration: none !important;
+  cursor: default;
 }
 
 /* --- Estilos para la cuadrícula de días --- */
 .react-calendar__month-view__days {
   display: grid !important;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 4px; /* Espacio entre días */
 }
 
 /* --- Estilos para cada "celda" de día --- */
 .react-calendar__tile {
-  padding: 0.75em 0.5em;
-  background: none; /* Fondo limpio */
+  padding: 1em 0.5em;
+  background: none;
   border: none;
   text-align: center;
   cursor: pointer;
-  border-radius: 4px;
-  color: #242424; /* Números oscuros */
+  border-radius: 12px; /* Botones redondeados */
+  color: white; /* Números blancos */
+  font-weight: 500;
+  transition: all 0.2s;
 }
 .react-calendar__tile:hover {
-  background: #e6e6e6;
+  background: #4A5568; /* gray.600 */
 }
 .react-calendar__tile--now {
-  background: #ffffe0;
+  background: transparent;
+  border: 1px solid #667eea; /* Borde índigo para "hoy" */
+  color: #667eea;
 }
 .react-calendar__tile--neighboringMonth {
-  color: #b0b0b0;
+  color: #4A5568; /* gray.600 - Días de otro mes muy oscuros */
 }
 
-/* Tu estilo verde (¡este ya lo tenías!) */
+/* --- DÍA COMPLETADO (VERDE -> ÍNDIGO/GRADIENTE) --- */
 .dia-completado {
-  background-color: #34d399 !important;
+  background: linear-gradient(to right, #667eea, #764ba2) !important;
   color: white !important;
-  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.4);
 }

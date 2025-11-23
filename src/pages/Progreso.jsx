@@ -16,10 +16,10 @@ import {
   StatLabel,
   StatNumber,
   StatHelpText,
-  StatGroup,
-  Icon
+  Icon,
+  VStack
 } from '@chakra-ui/react';
-import { StarIcon, CalendarIcon, CheckCircleIcon } from '@chakra-ui/icons';
+import { StarIcon, CalendarIcon, CheckCircleIcon, ArrowBackIcon } from '@chakra-ui/icons';
 
 // Importamos el Calendario (El CSS ya está en index.css)
 import Calendar from 'react-calendar';
@@ -91,76 +91,145 @@ function Progreso() {
   }
 
   // -----------------------------------------------------------------
-  // --- RENDERIZADO ---
+  // --- RENDERIZADO MODERN DARK ---
   // -----------------------------------------------------------------
   return (
-    <Container maxW="container.md" py={8}>
-      <Heading as="h1" size="lg" mb={2} color="white">
-        Informe de Progreso
-      </Heading>
-      <Text mb={8} color="whiteAlpha.700">
-        Resumen de tu rendimiento y constancia.
-      </Text>
+    <Box minH="100vh" bgGradient="linear(to-br, gray.900, gray.800)">
+      <Container maxW="container.md" py={10}>
+        
+        {/* --- CABECERA --- */}
+        <VStack spacing={2} align="start" mb={10}>
+          <Heading as="h1" size="xl" bgGradient="linear(to-r, #667eea, #764ba2)" bgClip="text">
+            Informe de Progreso
+          </Heading>
+          <Text color="gray.400" fontSize="lg">
+            Resumen de tu rendimiento y constancia.
+          </Text>
+        </VStack>
 
-      {cargando ? (
-        <Flex justify="center" align="center" h="200px">
-          <Spinner size="xl" color="teal.500" />
-        </Flex>
-      ) : (
-        <>
-          {/* --- SECCIÓN NUEVA: TARJETAS DE ESTADÍSTICAS --- */}
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={5} mb={10}>
-            
-            {/* Tarjeta 1: Total de Acciones */}
-            <Box p={5} shadow="md" borderWidth="1px" borderRadius="lg" bg="gray.700" borderColor="gray.600">
-              <Stat>
-                <StatLabel color="gray.400"><Icon as={CheckCircleIcon} mr={2}/>Acciones Totales</StatLabel>
-                <StatNumber fontSize="3xl" color="white">{stats.totalRegistros}</StatNumber>
-                <StatHelpText color="teal.300">Hábitos completados</StatHelpText>
-              </Stat>
+        {cargando ? (
+          <Flex justify="center" align="center" h="300px">
+            <Spinner size="xl" color="purple.500" thickness="4px" />
+          </Flex>
+        ) : (
+          <>
+            {/* --- SECCIÓN NUEVA: TARJETAS DE ESTADÍSTICAS --- */}
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={12}>
+              
+              {/* Tarjeta 1: Total de Acciones */}
+              <Box 
+                p={6} 
+                borderRadius="2xl" 
+                bg="gray.800" 
+                border="1px solid" 
+                borderColor="gray.700"
+                boxShadow="xl"
+                transition="transform 0.2s"
+                _hover={{ transform: 'translateY(-4px)', borderColor: '#667eea' }}
+              >
+                <Stat>
+                  <StatLabel color="gray.400" fontSize="sm" fontWeight="bold" mb={1}>
+                    <Icon as={CheckCircleIcon} mr={2} color="green.400"/>
+                    ACCIONES TOTALES
+                  </StatLabel>
+                  <StatNumber fontSize="4xl" color="white" fontWeight="extrabold">
+                    {stats.totalRegistros}
+                  </StatNumber>
+                  <StatHelpText color="gray.500" fontSize="sm">
+                    Hábitos completados
+                  </StatHelpText>
+                </Stat>
+              </Box>
+
+              {/* Tarjeta 2: Días Activos */}
+              <Box 
+                p={6} 
+                borderRadius="2xl" 
+                bg="gray.800" 
+                border="1px solid" 
+                borderColor="gray.700"
+                boxShadow="xl"
+                transition="transform 0.2s"
+                _hover={{ transform: 'translateY(-4px)', borderColor: '#764ba2' }}
+              >
+                <Stat>
+                  <StatLabel color="gray.400" fontSize="sm" fontWeight="bold" mb={1}>
+                    <Icon as={CalendarIcon} mr={2} color="purple.400"/>
+                    DÍAS ACTIVOS
+                  </StatLabel>
+                  <StatNumber fontSize="4xl" color="white" fontWeight="extrabold">
+                    {stats.diasTotales}
+                  </StatNumber>
+                  <StatHelpText color="gray.500" fontSize="sm">
+                    Días con actividad
+                  </StatHelpText>
+                </Stat>
+              </Box>
+
+              {/* Tarjeta 3: Hábitos Gestionados */}
+              <Box 
+                p={6} 
+                borderRadius="2xl" 
+                bg="gray.800" 
+                border="1px solid" 
+                borderColor="gray.700"
+                boxShadow="xl"
+                transition="transform 0.2s"
+                _hover={{ transform: 'translateY(-4px)', borderColor: 'orange.400' }}
+              >
+                <Stat>
+                  <StatLabel color="gray.400" fontSize="sm" fontWeight="bold" mb={1}>
+                    <Icon as={StarIcon} mr={2} color="orange.400"/>
+                    MIS HÁBITOS
+                  </StatLabel>
+                  <StatNumber fontSize="4xl" color="white" fontWeight="extrabold">
+                    {stats.totalHabitos}
+                  </StatNumber>
+                  <StatHelpText color="gray.500" fontSize="sm">
+                    En seguimiento
+                  </StatHelpText>
+                </Stat>
+              </Box>
+
+            </SimpleGrid>
+
+            {/* --- CALENDARIO --- */}
+            <Box
+              p={8}
+              bg="gray.800"
+              borderRadius="2xl"
+              boxShadow="2xl"
+              border="1px solid"
+              borderColor="gray.700"
+              mb={10}
+            >
+              <Heading size="md" mb={6} color="white" textAlign="center" letterSpacing="wide">
+                CALENDARIO DE ACTIVIDAD
+              </Heading>
+              <Calendar
+                tileClassName={esDiaCompletado}
+                locale="es-ES"
+              />
             </Box>
+          </>
+        )}
 
-            {/* Tarjeta 2: Días Activos */}
-            <Box p={5} shadow="md" borderWidth="1px" borderRadius="lg" bg="gray.700" borderColor="gray.600">
-              <Stat>
-                <StatLabel color="gray.400"><Icon as={CalendarIcon} mr={2}/>Días Activos</StatLabel>
-                <StatNumber fontSize="3xl" color="white">{stats.diasTotales}</StatNumber>
-                <StatHelpText color="teal.300">Días con actividad</StatHelpText>
-              </Stat>
-            </Box>
-
-            {/* Tarjeta 3: Hábitos Gestionados */}
-            <Box p={5} shadow="md" borderWidth="1px" borderRadius="lg" bg="gray.700" borderColor="gray.600">
-              <Stat>
-                <StatLabel color="gray.400"><Icon as={StarIcon} mr={2}/>Mis Hábitos</StatLabel>
-                <StatNumber fontSize="3xl" color="white">{stats.totalHabitos}</StatNumber>
-                <StatHelpText color="teal.300">En seguimiento</StatHelpText>
-              </Stat>
-            </Box>
-
-          </SimpleGrid>
-
-          {/* --- CALENDARIO --- */}
-          <Box
-            p={6}
-            bg="white"
-            borderRadius="xl"
-            boxShadow="xl"
-            mb={8}
-          >
-            <Heading size="md" mb={4} color="gray.700" textAlign="center">Calendario de Actividad</Heading>
-            <Calendar
-              tileClassName={esDiaCompletado}
-              locale="es-ES"
-            />
-          </Box>
-        </>
-      )}
-
-      <Button as={Link} to="/" colorScheme="teal" variant="outline" w="full">
-        Volver al Dashboard
-      </Button>
-    </Container>
+        <Button 
+          as={Link} 
+          to="/" 
+          leftIcon={<ArrowBackIcon />}
+          colorScheme="whiteAlpha" 
+          variant="ghost" 
+          color="gray.400"
+          _hover={{ color: 'white', bg: 'whiteAlpha.100' }}
+          size="lg"
+          w="full"
+          rounded="xl"
+        >
+          Volver al Dashboard
+        </Button>
+      </Container>
+    </Box>
   );
 }
 

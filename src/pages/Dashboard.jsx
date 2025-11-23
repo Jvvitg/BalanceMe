@@ -5,8 +5,8 @@ import { supabase } from '../supabaseClient.js';
 // --- IMPORTACIONES DE CHAKRA UI ---
 import {
   Box, Button, Container, Heading, HStack, IconButton, Input,
-  Text, Checkbox, Spinner, Flex, Spacer, useToast, // <-- NUEVO: useToast
-  Card, CardBody, Badge, VStack, Divider, Tooltip // <-- NUEVOS COMPONENTES DE DISEÑO
+  Text, Checkbox, Spinner, Flex, Spacer, useToast,
+  Card, CardBody, Badge, VStack, Tooltip, InputGroup, InputLeftElement
 } from '@chakra-ui/react';
 import { EditIcon, DeleteIcon, CheckIcon, CloseIcon, AddIcon, StarIcon } from '@chakra-ui/icons';
 
@@ -17,7 +17,7 @@ function getHoy() {
 
 function Dashboard() {
   const navigate = useNavigate();
-  const toast = useToast(); // <-- NUEVO: Inicializamos el hook de notificaciones
+  const toast = useToast();
 
   // --- ESTADOS ---
   const [habitos, setHabitos] = useState([]);
@@ -28,12 +28,12 @@ function Dashboard() {
   const [cargando, setCargando] = useState(true);
   const [userId, setUserId] = useState(null);
 
-  // --- LÓGICA (La misma que ya arreglamos, no cambia) ---
+  // --- LÓGICA ---
   const fetchDatos = useCallback(async (usuario) => {
     if (!usuario) return;
     setCargando(true);
     
-    const { data: habitosData, error: habitosError } = await supabase.from('habitos').select('*').eq('user_id', usuario.id).order('created_at', { ascending: false }); // Ordenamos por fecha
+    const { data: habitosData, error: habitosError } = await supabase.from('habitos').select('*').eq('user_id', usuario.id).order('created_at', { ascending: false });
     if (habitosError) console.error(habitosError.message);
 
     const hoy = getHoy();
@@ -62,7 +62,7 @@ function Dashboard() {
 
   const handleLogout = async () => await supabase.auth.signOut();
 
-  // --- ACCIONES CON TOASTS (NOTIFICACIONES) ---
+  // --- ACCIONES ---
 
   const handleCrearHabito = async (e) => {
     e.preventDefault();
@@ -74,7 +74,6 @@ function Dashboard() {
     } else {
       setNuevoHabito("");
       fetchDatos({ id: userId });
-      // NUEVO: Notificación de éxito
       toast({ title: "¡Hábito creado!", description: "A por esa racha 🔥", status: "success", duration: 3000, isClosable: true });
     }
   };
@@ -87,7 +86,6 @@ function Dashboard() {
       toast({ title: "Error", description: error.message, status: "error", duration: 3000 });
     } else {
       fetchDatos({ id: userId });
-      // NUEVO: Notificación de borrado
       toast({ title: "Eliminado", description: "El hábito ha sido borrado.", status: "info", duration: 3000 });
     }
   };
@@ -121,124 +119,222 @@ function Dashboard() {
   };
 
   // -----------------------------------------------------------------
-  // --- RENDERIZADO CON DISEÑO PROFESIONAL ---
+  // --- RENDERIZADO CON DISEÑO "MODERN DARK" ---
   // -----------------------------------------------------------------
   return (
-    <Container maxW="container.md" py={10}>
-      
-      {/* --- CABECERA --- */}
-      <Flex mb={10} align="center" wrap="wrap" gap={4}>
-        <Box>
-          <Heading as="h1" size="xl" bgGradient="linear(to-l, #34d399, #3182ce)" bgClip="text">
-            BalanceMe
-          </Heading>
-          <Text color="gray.400" fontSize="sm">Tu gestor de hábitos diario</Text>
+    <Box minH="100vh" bgGradient="linear(to-br, gray.900, gray.800)">
+      <Container maxW="container.md" py={10}>
+        
+        {/* --- CABECERA --- */}
+        <Flex mb={12} align="center" wrap="wrap" gap={4}>
+          <Box>
+            <Heading as="h1" size="2xl" bgGradient="linear(to-r, #667eea, #764ba2)" bgClip="text" letterSpacing="tight" pb={2}>
+              BalanceMe
+            </Heading>
+            <Text color="gray.400" fontSize="md" fontWeight="medium">Tu gestor de hábitos diario</Text>
+          </Box>
+          <Spacer />
+          <HStack spacing={3}>
+            <Button 
+              as={Link} to="/progreso" 
+              leftIcon={<StarIcon />} 
+              variant="solid" 
+              bg="whiteAlpha.200" 
+              color="white" 
+              _hover={{ bg: 'whiteAlpha.300' }}
+              rounded="full"
+              size="sm"
+              px={6}
+            >
+              Progreso
+            </Button>
+            <Button 
+              onClick={handleLogout} 
+              variant="ghost" 
+              color="gray.400" 
+              _hover={{ color: 'white', bg: 'whiteAlpha.100' }}
+              rounded="full"
+              size="sm"
+            >
+              Salir
+            </Button>
+          </HStack>
+        </Flex>
+
+        {/* --- SECCIÓN HERO: CREAR HÁBITO --- */}
+        <Box 
+          mb={12} 
+          p={1} 
+          borderRadius="2xl" 
+          bgGradient="linear(to-r, #667eea, #764ba2)" // Borde degradado
+        >
+          <Box 
+            bg="gray.900" 
+            borderRadius="xl" 
+            p={6} 
+            boxShadow="xl"
+          >
+            <form onSubmit={handleCrearHabito}>
+              <InputGroup size="lg">
+                <InputLeftElement pointerEvents="none" children={<AddIcon color="gray.500" />} />
+                <Input 
+                  placeholder="✨ ¿Qué nuevo hábito quieres empezar hoy?" 
+                  value={nuevoHabito} 
+                  onChange={(e) => setNuevoHabito(e.target.value)} 
+                  bg="transparent" 
+                  border="none"
+                  color="white"
+                  fontSize="lg"
+                  _placeholder={{ color: 'gray.500' }}
+                  _focus={{ boxShadow: "none" }}
+                />
+                <Button 
+                  type="submit" 
+                  colorScheme="purple" 
+                  bgGradient="linear(to-r, #667eea, #764ba2)"
+                  _hover={{ bgGradient: "linear(to-r, #764ba2, #667eea)" }}
+                  size="md"
+                  px={8}
+                  rounded="lg"
+                  isDisabled={!nuevoHabito.trim()}
+                >
+                  Crear
+                </Button>
+              </InputGroup>
+            </form>
+          </Box>
         </Box>
-        <Spacer />
-        <HStack spacing={3}>
-          <Button as={Link} to="/progreso" leftIcon={<StarIcon />} variant="outline" colorScheme="teal" size="sm">
-            Progreso
-          </Button>
-          <Button onClick={handleLogout} colorScheme="whiteAlpha" variant="ghost" size="sm">
-            Salir
-          </Button>
-        </HStack>
-      </Flex>
 
-      {/* --- SECCIÓN DE CREAR (TARJETA DESTACADA) --- */}
-      <Card bg="gray.700" variant="outline" borderColor="gray.600" mb={8} boxShadow="lg">
-        <CardBody>
-          <form onSubmit={handleCrearHabito}>
-            <Flex gap={4} align="center">
-              <Input 
-                placeholder="✨ Escribe un nuevo hábito..." 
-                value={nuevoHabito} 
-                onChange={(e) => setNuevoHabito(e.target.value)} 
-                bg="gray.800" 
-                border="none"
-                _focus={{ boxShadow: "0 0 0 2px #34d399" }} // Foco verde
-              />
-              <IconButton 
-                type="submit" 
-                icon={<AddIcon />} 
-                colorScheme="teal" 
-                aria-label="Crear"
-                isDisabled={!nuevoHabito.trim()} // Deshabilitado si está vacío
-              />
-            </Flex>
-          </form>
-        </CardBody>
-      </Card>
-
-      {/* --- LISTA DE HÁBITOS --- */}
-      <Heading as="h2" size="md" mb={4} color="gray.300">Tus Objetivos de Hoy</Heading>
-      
-      {cargando ? (
-        <Flex justify="center" py={10}><Spinner size="xl" color="teal.500" /></Flex>
-      ) : (
-        <VStack spacing={4} align="stretch">
-          {habitos.length === 0 ? (
-            <Box textAlign="center" py={10} bg="whiteAlpha.50" borderRadius="xl" borderStyle="dashed" borderWidth="2px" borderColor="gray.600">
-              <Text color="gray.400" fontSize="lg">🌱 Aún no tienes hábitos.</Text>
-              <Text color="gray.500" fontSize="sm">¡Crea el primero arriba para empezar!</Text>
-            </Box>
-          ) : (
-            habitos.map((habito) => (
-              <Card key={habito.id} bg="gray.700" size="sm" _hover={{ transform: 'translateY(-2px)', shadow: 'md' }} transition="all 0.2s">
-                <CardBody display="flex" alignItems="center" gap={4}>
-                  
-                  {editingId === habito.id ? (
-                    // --- MODO EDICIÓN ---
-                    <Flex w="100%" gap={2}>
-                      <Input value={editingText} onChange={(e) => setEditingText(e.target.value)} autoFocus bg="gray.800" />
-                      <IconButton icon={<CheckIcon />} onClick={() => handleActualizarHabito(habito.id)} colorScheme="green" size="sm" />
-                      <IconButton icon={<CloseIcon />} onClick={() => setEditingId(null)} size="sm" />
-                    </Flex>
-                  ) : (
-                    // --- MODO VISUALIZACIÓN ---
-                    <>
-                      <Checkbox 
-                        isChecked={registrosHoy.has(habito.id)} 
-                        onChange={(e) => handleToggleRegistro(habito.id, e.target.checked)}
-                        colorScheme="teal"
-                        size="lg"
-                      />
-                      
-                      <Box flex="1">
-                        <Text 
-                          fontSize="md" 
-                          fontWeight="medium" 
-                          color={registrosHoy.has(habito.id) ? "gray.400" : "white"}
-                          textDecoration={registrosHoy.has(habito.id) ? "line-through" : "none"}
-                        >
-                          {habito.name}
-                        </Text>
+        {/* --- LISTA DE HÁBITOS --- */}
+        <Heading as="h2" size="lg" mb={6} color="white" fontWeight="bold">
+          Tus Objetivos de Hoy
+        </Heading>
+        
+        {cargando ? (
+          <Flex justify="center" py={20}><Spinner size="xl" color="purple.500" thickness="4px" /></Flex>
+        ) : (
+          <VStack spacing={4} align="stretch">
+            {habitos.length === 0 ? (
+              <Flex 
+                direction="column" 
+                align="center" 
+                justify="center" 
+                py={16} 
+                bg="whiteAlpha.50" 
+                borderRadius="2xl" 
+                border="2px dashed" 
+                borderColor="gray.700"
+              >
+                <Text fontSize="4xl" mb={4}>🌱</Text>
+                <Text color="gray.300" fontSize="xl" fontWeight="medium">Aún no tienes hábitos.</Text>
+                <Text color="gray.500">¡Usa la barra de arriba para comenzar tu viaje!</Text>
+              </Flex>
+            ) : (
+              habitos.map((habito) => (
+                <Card 
+                  key={habito.id} 
+                  bg="gray.800" 
+                  border="1px solid" 
+                  borderColor="gray.700" 
+                  borderRadius="xl"
+                  overflow="hidden"
+                  transition="all 0.2s"
+                  _hover={{ transform: 'translateY(-2px)', borderColor: '#667eea', boxShadow: 'lg' }}
+                >
+                  <CardBody display="flex" alignItems="center" gap={5} py={5}>
+                    
+                    {editingId === habito.id ? (
+                      // --- MODO EDICIÓN ---
+                      <Flex w="100%" gap={3} align="center">
+                        <Input 
+                          value={editingText} 
+                          onChange={(e) => setEditingText(e.target.value)} 
+                          autoFocus 
+                          bg="gray.700" 
+                          border="none"
+                          color="white"
+                          size="lg"
+                          rounded="md"
+                        />
+                        <IconButton icon={<CheckIcon />} onClick={() => handleActualizarHabito(habito.id)} colorScheme="green" rounded="full" />
+                        <IconButton icon={<CloseIcon />} onClick={() => setEditingId(null)} variant="ghost" color="gray.400" rounded="full" />
+                      </Flex>
+                    ) : (
+                      // --- MODO VISUALIZACIÓN ---
+                      <>
+                        <Checkbox 
+                          isChecked={registrosHoy.has(habito.id)} 
+                          onChange={(e) => handleToggleRegistro(habito.id, e.target.checked)}
+                          colorScheme="purple"
+                          size="lg"
+                          iconColor="white"
+                          borderColor="gray.500"
+                        />
                         
-                        {/* --- RACHA (BADGE) --- */}
-                        {habito.streak > 0 && (
-                          <Badge colorScheme="orange" variant="subtle" fontSize="0.7em" mt={1}>
-                            🔥 {habito.streak} días seguidos
-                          </Badge>
-                        )}
-                      </Box>
+                        <Box flex="1">
+                          <Text 
+                            fontSize="lg" 
+                            fontWeight={registrosHoy.has(habito.id) ? "normal" : "semibold"} 
+                            color={registrosHoy.has(habito.id) ? "gray.500" : "white"}
+                            textDecoration={registrosHoy.has(habito.id) ? "line-through" : "none"}
+                            transition="all 0.2s"
+                          >
+                            {habito.name}
+                          </Text>
+                          
+                          {/* --- RACHA (BADGE) --- */}
+                          {habito.streak > 0 && (
+                            <Badge 
+                              bgGradient="linear(to-r, orange.400, red.500)" 
+                              color="white" 
+                              variant="solid" 
+                              fontSize="xs" 
+                              mt={2} 
+                              px={2} 
+                              py={0.5} 
+                              rounded="full"
+                              textTransform="none"
+                              fontWeight="bold"
+                            >
+                              🔥 {habito.streak} días seguidos
+                            </Badge>
+                          )}
+                        </Box>
 
-                      <HStack>
-                        <Tooltip label="Editar nombre">
-                          <IconButton icon={<EditIcon />} onClick={() => handleModoEdicion(habito)} size="sm" variant="ghost" color="gray.400" />
-                        </Tooltip>
-                        <Tooltip label="Eliminar hábito">
-                          <IconButton icon={<DeleteIcon />} onClick={() => handleBorrarHabito(habito.id)} size="sm" variant="ghost" color="red.300" _hover={{ bg: 'red.900' }} />
-                        </Tooltip>
-                      </HStack>
-                    </>
-                  )}
-                </CardBody>
-              </Card>
-            ))
-          )}
-        </VStack>
-      )}
-    </Container>
+                        <HStack spacing={1}>
+                          <Tooltip label="Editar" hasArrow bg="gray.700">
+                            <IconButton 
+                              icon={<EditIcon />} 
+                              onClick={() => handleModoEdicion(habito)} 
+                              size="sm" 
+                              variant="ghost" 
+                              color="gray.500" 
+                              _hover={{ color: 'white', bg: 'whiteAlpha.200' }} 
+                              rounded="full"
+                            />
+                          </Tooltip>
+                          <Tooltip label="Eliminar" hasArrow bg="red.600">
+                            <IconButton 
+                              icon={<DeleteIcon />} 
+                              onClick={() => handleBorrarHabito(habito.id)} 
+                              size="sm" 
+                              variant="ghost" 
+                              color="gray.500" 
+                              _hover={{ color: 'red.400', bg: 'whiteAlpha.200' }} 
+                              rounded="full"
+                            />
+                          </Tooltip>
+                        </HStack>
+                      </>
+                    )}
+                  </CardBody>
+                </Card>
+              ))
+            )}
+          </VStack>
+        )}
+      </Container>
+    </Box>
   );
 }
 

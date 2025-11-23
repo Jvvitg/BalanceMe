@@ -22,7 +22,13 @@ const config = {
   initialColorMode: 'dark',  // Forzamos el modo oscuro
   useSystemColorMode: false, // Ignoramos la configuración del OS
 };
-const theme = extendTheme({ config }); // Creamos el tema
+const theme = extendTheme({ 
+  config,
+  fonts: {
+    heading: "'Outfit', sans-serif",
+    body: "'Outfit', sans-serif",
+  },
+}); // Creamos el tema
 
 // 5. Definimos nuestras rutas (sin cambios)
 const router = createBrowserRouter([

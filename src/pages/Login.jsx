@@ -1,95 +1,113 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// 1. Importamos los componentes básicos de Chakra
-import { Box, Heading, Container, Text, SimpleGrid, Image } from '@chakra-ui/react'; // Añade SimpleGrid e Image
+// Importaciones de Chakra UI
+import { 
+  Box, 
+  Flex, 
+  Heading, 
+  Text, 
+  useColorMode, 
+  Image, 
+  VStack 
+} from '@chakra-ui/react';
 
-// 2. Importamos el componente Auth
+// Importaciones de Supabase
 import { Auth } from '@supabase/auth-ui-react';
-
-// 3. Importamos ThemeSupa de la librería CORRECTA
-import { ThemeSupa } from '@supabase/auth-ui-shared'; 
-
-// 4. Importamos nuestro cliente de Supabase
+import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '../supabaseClient.js';
+
+// Tema personalizado para el formulario (Verde Fitia/BalanceMe)
+const customTheme = {
+    ...ThemeSupa,
+    colors: {
+        ...ThemeSupa.colors,
+        brand: { 
+            500: '#34d399', // Nuestro verde principal
+            600: '#2bb884', // Verde un poco más oscuro para hover
+        }
+    },
+};
 
 function Login() {
   const navigate = useNavigate();
+  const { colorMode } = useColorMode();
 
-  // -------------------------------------------------------------
-  // GUARDIÁN DE RUTA
-  // -------------------------------------------------------------
+  // --- Guardián de Ruta (Si ya entró, lo mandamos al Dashboard) ---
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate('/');
-      }
+      if (session) navigate('/');
     });
-
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || session) {
-        navigate('/');
-      }
+      if (event === 'SIGNED_IN' || session) navigate('/');
     });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+    return () => authListener.subscription.unsubscribe();
   }, [navigate]);
 
-return (
-    // Usamos Container para centrar y limitar el ancho MÁXIMO
-    <Container maxW="container.lg" centerContent minH="100vh" display="flex" alignItems="center"> 
+  return (
+    // Flex contenedor principal (ocupa toda la pantalla)
+    <Flex minH="100vh" direction={{ base: 'column', md: 'row' }}>
       
-      {/* SimpleGrid crea las columnas. 
-          'columns={{ base: 1, md: 2 }}' significa: 1 columna en móviles, 2 en pantallas medianas y grandes.
-          'spacing={10}' añade espacio entre columnas.
-      */}
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10} w="100%" alignItems="center">
-        
-        {/* --- Columna Izquierda (Formulario) --- */}
-        <Box 
-          p={8} 
-          borderRadius="xl" 
-          boxShadow="xl" 
-          bg="gray.700" // El fondo gris oscuro que elegimos
-          borderWidth="1px" 
-          borderColor="gray.600"
-        >
-          <Heading as="h1" size="lg" textAlign="center" mb={4} color="white"> {/* Un poco más pequeño */}
-            ¡Bienvenido/a de vuelta!
-          </Heading>
-
-          <Text fontSize="md" textAlign="center" mb={8} color="gray.300">
-            Inicia sesión para seguir construyendo tus hábitos.
-          </Text>
+      {/* --- COLUMNA IZQUIERDA: EL FORMULARIO --- */}
+      <Flex 
+        p={8} 
+        flex={1} 
+        align={'center'} 
+        justify={'center'} 
+        bg="gray.900" // Fondo oscuro elegante
+      >
+        <VStack spacing={6} w={'full'} maxW={'md'} align="stretch">
           
-          {/* El componente <Auth> de Supabase se queda aquí */}
-          <Auth
-            supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }} // Mantenemos el tema base de Supabase
-            providers={['github']}
-            localization={{
-              // ... (Tu objeto de localización es idéntico) ...
-              variables: {
-                sign_in: { email_label: 'Correo electrónico', password_label: 'Contraseña', button_label: 'Iniciar sesión', social_provider_text: 'Iniciar con {{provider}}', link_text: '¿Ya tienes cuenta? Inicia sesión' },
-                sign_up: { email_label: 'Correo electrónico', password_label: 'Contraseña', button_label: 'Crear cuenta', social_provider_text: 'Registrarse con {{provider}}', link_text: '¿No tienes cuenta? Crea una' },
-                forgotten_password: { email_label: 'Correo electrónico', password_label: 'Contraseña', button_label: 'Enviar instrucciones', link_text: '¿Olvidaste tu contraseña?' }
-              },
-            }}
-          />
-        </Box>
-
-        {/* --- Columna Derecha (Imagen/Placeholder) --- */}
-        <Box display={{ base: 'none', md: 'block' }}> {/* Ocultamos en móviles */}
-          {/* Por ahora, un placeholder. Más adelante puedes poner un <Image src="..." /> */}
-          <Box bg="teal.500" h="400px" borderRadius="xl" display="flex" alignItems="center" justifyContent="center">
-            <Text fontSize="2xl" color="white">Aquí va una imagen cool 🧘‍♀️</Text>
+          {/* Encabezado de bienvenida */}
+          <Box textAlign="center" mb={4}>
+            <Heading fontSize={'4xl'} mb={2} bgGradient="linear(to-r, #34d399, #3182ce)" bgClip="text">
+              BalanceMe
+            </Heading>
+            <Text fontSize={'lg'} color={'gray.400'}>
+              Construye la mejor versión de ti mismo, un hábito a la vez.
+            </Text>
           </Box>
-        </Box>
 
-      </SimpleGrid>
-    </Container>
+          {/* Caja del Formulario */}
+          <Box 
+            bg="gray.800" 
+            p={8} 
+            borderRadius="xl" 
+            boxShadow="lg" 
+            border="1px solid" 
+            borderColor="gray.700"
+          >
+            <Auth
+              supabaseClient={supabase}
+              appearance={{ theme: customTheme }}
+              theme={colorMode}
+              providers={['github']}
+              localization={{
+                variables: {
+                  sign_in: { email_label: 'Correo electrónico', password_label: 'Contraseña', button_label: 'Entrar a mi cuenta', social_provider_text: 'Entrar con {{provider}}', link_text: '¿No tienes cuenta? Regístrate gratis' },
+                  sign_up: { email_label: 'Correo electrónico', password_label: 'Crea una contraseña', button_label: 'Comenzar ahora', social_provider_text: 'Registrarse con {{provider}}', link_text: '¿Ya tienes cuenta? Inicia sesión' },
+                  forgotten_password: { email_label: 'Correo electrónico', button_label: 'Recuperar contraseña', link_text: 'Olvidé mi contraseña' }
+                },
+              }}
+            />
+          </Box>
+        </VStack>
+      </Flex>
+
+      {/* --- COLUMNA DERECHA: LA IMAGEN INSPIRACIONAL --- */}
+      <Flex flex={1} display={{ base: 'none', md: 'flex' }}>
+        <Image
+          alt={'Login Image'}
+          objectFit={'cover'}
+          // Usamos una imagen de Unsplash de alta calidad (estilo Productividad/Zen)
+          src={
+            'https://images.unsplash.com/photo-1499750310159-5b600aaf0321?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80'
+          }
+          w="100%"
+          h="100%"
+        />
+      </Flex>
+    </Flex>
   );
 }
 

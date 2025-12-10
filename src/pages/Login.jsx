@@ -100,9 +100,30 @@ const authAppearance = {
 const authProviders = [];
 const authLocalization = {
   variables: {
-    sign_in: { email_label: 'Correo electrónico', password_label: 'Contraseña', button_label: 'Entrar', social_provider_text: 'Entrar con {{provider}}', link_text: '¿No tienes cuenta? Regístrate' },
-    sign_up: { email_label: 'Correo electrónico', password_label: 'Contraseña', button_label: 'Registrarse', social_provider_text: 'Registrarse con {{provider}}', link_text: '¿Ya tienes cuenta? Inicia sesión' },
-    forgotten_password: { email_label: 'Correo electrónico', button_label: 'Recuperar contraseña', link_text: 'Olvidé mi contraseña' }
+    sign_in: { 
+      email_label: 'Correo electrónico', 
+      password_label: 'Contraseña', 
+      email_input_placeholder: 'Tu correo electrónico', 
+      password_input_placeholder: 'Tu contraseña', 
+      button_label: 'Entrar', 
+      social_provider_text: 'Entrar con {{provider}}', 
+      link_text: '¿No tienes cuenta? Regístrate' 
+    },
+    sign_up: { 
+      email_label: 'Correo electrónico', 
+      password_label: 'Contraseña', 
+      email_input_placeholder: 'Tu correo electrónico', 
+      password_input_placeholder: 'Tu contraseña', 
+      button_label: 'Registrarse', 
+      social_provider_text: 'Registrarse con {{provider}}', 
+      link_text: '¿Ya tienes cuenta? Inicia sesión' 
+    },
+    forgotten_password: { 
+      email_label: 'Correo electrónico', 
+      email_input_placeholder: 'Tu correo electrónico', 
+      button_label: 'Recuperar contraseña', 
+      link_text: 'Olvidé mi contraseña' 
+    }
   },
 };
 

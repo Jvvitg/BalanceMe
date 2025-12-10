@@ -60,7 +60,7 @@ function Dashboard() {
     return () => authListener.subscription.unsubscribe();
   }, [navigate, fetchDatos]); 
 
-  const handleLogout = async () => await supabase.auth.signOut();
+  // const handleLogout = async () => await supabase.auth.signOut(); // YA NO SE USA AQUÍ
 
   // --- ACCIONES ---
 
@@ -149,14 +149,14 @@ function Dashboard() {
               Progreso
             </Button>
             <Button 
-              onClick={handleLogout} 
+              as={Link} to="/" 
               variant="ghost" 
               color="gray.400" 
               _hover={{ color: 'white', bg: 'whiteAlpha.100' }}
               rounded="full"
               size="sm"
             >
-              Salir
+              Volver al Inicio
             </Button>
           </HStack>
         </Flex>

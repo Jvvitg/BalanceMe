@@ -17,11 +17,17 @@ import {
   StatNumber,
   StatHelpText,
   Icon,
-  VStack
+  VStack,
+  Spacer
 } from '@chakra-ui/react';
-import { StarIcon, CalendarIcon, CheckCircleIcon, ArrowBackIcon } from '@chakra-ui/icons';
+import { 
+  CalendarIcon, 
+  CheckCircleIcon, 
+  ArrowBackIcon, 
+  TimeIcon
+} from '@chakra-ui/icons';
 
-// Importamos el Calendario (El CSS ya está en index.css)
+// Importamos el Calendario
 import Calendar from 'react-calendar';
 
 function Progreso() {
@@ -31,42 +37,71 @@ function Progreso() {
   const [registros, setRegistros] = useState(new Set());
   const [cargando, setCargando] = useState(true);
   
-  // Nuevos estados para el "Informe de Gestión"
   const [stats, setStats] = useState({
     totalRegistros: 0,
     totalHabitos: 0,
-    diasTotales: 0
+    diasTotales: 0,
+    currentStreak: 0
   });
 
   // --- LÓGICA DE DATOS ---
   async function fetchDatos(usuario) {
     setCargando(true);
 
-    // 1. Traemos TODOS los registros (historial completo)
+    // 1. Traer Registros
     const { data: registrosData, error: errorRegistros } = await supabase
       .from('registros')
       .select('fecha')
-      .eq('user_id', usuario.id);
+      .eq('user_id', usuario.id)
+      .order('fecha', { ascending: true });
 
-    // 2. Contamos cuántos hábitos tiene el usuario
-    const { count: habitosCount, error: errorHabitos } = await supabase
+    // 2. Traer Hábitos
+    const { data: habitosData, error: errorHabitos } = await supabase
       .from('habitos')
-      .select('*', { count: 'exact', head: true }) // Solo cuenta, no trae los datos
+      .select('*')
       .eq('user_id', usuario.id);
 
     if (errorRegistros || errorHabitos) {
       console.error('Error cargando datos');
     } else {
-      // Preparamos los datos para el calendario
       const fechasCompletadas = new Set(registrosData.map(r => r.fecha));
       setRegistros(fechasCompletadas);
 
-      // Guardamos las estadísticas para el Informe
-      setStats({
-        totalRegistros: registrosData.length, // Total de veces que marcó un checkbox
-        totalHabitos: habitosCount || 0,      // Total de hábitos creados
-        diasTotales: fechasCompletadas.size   // Total de días únicos trabajados
-      });
+      // Calcular Racha Actual (aproximada)
+      let streak = 0;
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      
+      if (registrosData.length > 0) {
+          let current = new Date(registrosData[registrosData.length - 1].fecha);
+          let count = 1;
+          for (let i = registrosData.length - 2; i >= 0; i--) {
+              const prev = new Date(registrosData[i].fecha);
+              const diffTime = Math.abs(current - prev);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+              
+              if (diffDays === 1) {
+                  count++;
+                  current = prev;
+              } else if (diffDays === 0) {
+                  continue; // Mismo día
+              } else {
+                  break; // Racha rota
+              }
+          }
+          const lastDate = registrosData[registrosData.length - 1].fecha;
+          if (lastDate === today || lastDate === yesterday) {
+              streak = count;
+          }
+      }
+
+      const newStats = {
+        totalRegistros: registrosData.length,
+        totalHabitos: habitosData?.length || 0,
+        diasTotales: fechasCompletadas.size,
+        currentStreak: streak
+      };
+      setStats(newStats);
     }
     setCargando(false);
   }
@@ -98,14 +133,17 @@ function Progreso() {
       <Container maxW="container.md" py={10}>
         
         {/* --- CABECERA --- */}
-        <VStack spacing={2} align="start" mb={10}>
-          <Heading as="h1" size="xl" bgGradient="linear(to-r, #667eea, #764ba2)" bgClip="text">
-            Informe de Progreso
-          </Heading>
-          <Text color="gray.400" fontSize="lg">
-            Resumen de tu rendimiento y constancia.
-          </Text>
-        </VStack>
+        <Flex mb={10} align="center" wrap="wrap" gap={4}>
+          <VStack spacing={2} align="start">
+            <Heading as="h1" size="xl" bgGradient="linear(to-r, #667eea, #764ba2)" bgClip="text">
+              Informe de Progreso
+            </Heading>
+            <Text color="gray.400" fontSize="lg">
+              Tus estadísticas detalladas.
+            </Text>
+          </VStack>
+          <Spacer />
+        </Flex>
 
         {cargando ? (
           <Flex justify="center" align="center" h="300px">
@@ -113,20 +151,10 @@ function Progreso() {
           </Flex>
         ) : (
           <>
-            {/* --- SECCIÓN NUEVA: TARJETAS DE ESTADÍSTICAS --- */}
+            {/* --- SECCIÓN 1: TARJETAS DE ESTADÍSTICAS --- */}
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={12}>
               
-              {/* Tarjeta 1: Total de Acciones */}
-              <Box 
-                p={6} 
-                borderRadius="2xl" 
-                bg="gray.800" 
-                border="1px solid" 
-                borderColor="gray.700"
-                boxShadow="xl"
-                transition="transform 0.2s"
-                _hover={{ transform: 'translateY(-4px)', borderColor: '#667eea' }}
-              >
+              <Box p={6} borderRadius="2xl" bg="gray.800" border="1px solid" borderColor="gray.700" boxShadow="xl">
                 <Stat>
                   <StatLabel color="gray.400" fontSize="sm" fontWeight="bold" mb={1}>
                     <Icon as={CheckCircleIcon} mr={2} color="green.400"/>
@@ -135,23 +163,10 @@ function Progreso() {
                   <StatNumber fontSize="4xl" color="white" fontWeight="extrabold">
                     {stats.totalRegistros}
                   </StatNumber>
-                  <StatHelpText color="gray.500" fontSize="sm">
-                    Hábitos completados
-                  </StatHelpText>
                 </Stat>
               </Box>
 
-              {/* Tarjeta 2: Días Activos */}
-              <Box 
-                p={6} 
-                borderRadius="2xl" 
-                bg="gray.800" 
-                border="1px solid" 
-                borderColor="gray.700"
-                boxShadow="xl"
-                transition="transform 0.2s"
-                _hover={{ transform: 'translateY(-4px)', borderColor: '#764ba2' }}
-              >
+              <Box p={6} borderRadius="2xl" bg="gray.800" border="1px solid" borderColor="gray.700" boxShadow="xl">
                 <Stat>
                   <StatLabel color="gray.400" fontSize="sm" fontWeight="bold" mb={1}>
                     <Icon as={CalendarIcon} mr={2} color="purple.400"/>
@@ -160,40 +175,25 @@ function Progreso() {
                   <StatNumber fontSize="4xl" color="white" fontWeight="extrabold">
                     {stats.diasTotales}
                   </StatNumber>
-                  <StatHelpText color="gray.500" fontSize="sm">
-                    Días con actividad
-                  </StatHelpText>
                 </Stat>
               </Box>
 
-              {/* Tarjeta 3: Hábitos Gestionados */}
-              <Box 
-                p={6} 
-                borderRadius="2xl" 
-                bg="gray.800" 
-                border="1px solid" 
-                borderColor="gray.700"
-                boxShadow="xl"
-                transition="transform 0.2s"
-                _hover={{ transform: 'translateY(-4px)', borderColor: 'orange.400' }}
-              >
+              <Box p={6} borderRadius="2xl" bg="gray.800" border="1px solid" borderColor="gray.700" boxShadow="xl">
                 <Stat>
                   <StatLabel color="gray.400" fontSize="sm" fontWeight="bold" mb={1}>
-                    <Icon as={StarIcon} mr={2} color="orange.400"/>
-                    MIS HÁBITOS
+                    <Icon as={TimeIcon} mr={2} color="orange.400"/>
+                    RACHA ACTUAL
                   </StatLabel>
                   <StatNumber fontSize="4xl" color="white" fontWeight="extrabold">
-                    {stats.totalHabitos}
+                    {stats.currentStreak}
                   </StatNumber>
-                  <StatHelpText color="gray.500" fontSize="sm">
-                    En seguimiento
-                  </StatHelpText>
+                  <StatHelpText color="gray.500" fontSize="sm">Días seguidos</StatHelpText>
                 </Stat>
               </Box>
 
             </SimpleGrid>
 
-            {/* --- CALENDARIO --- */}
+            {/* --- SECCIÓN 2: CALENDARIO --- */}
             <Box
               p={8}
               bg="gray.800"
@@ -226,7 +226,7 @@ function Progreso() {
           w="full"
           rounded="xl"
         >
-          Volver al Dashboard
+          Volver al Inicio
         </Button>
       </Container>
     </Box>
